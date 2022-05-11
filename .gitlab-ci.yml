@@ -1,0 +1,83 @@
+stages:
+  - validate
+  - plan
+  - deploy
+
+tf_validate:
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: validate
+  except:
+    - main
+  only:
+    - merge_requests
+    - branches
+  script:
+    - terraform init
+    - terraform validate
+    - terraform fmt -check=true
+
+generate plan for stage env:
+  except:
+    - main
+  only:
+    - merge_requests
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: plan
+  script:
+    - terraform init
+    - terraform workspace select stage
+    - terraform plan  -var-file=common.tfvars -var-file=stage.env.tfvars -out plan
+  artifacts:
+    name: plan
+    paths:
+      - plan
+
+apply plan on stage env:
+  except:
+    - main
+  only:
+    - merge_requests
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: deploy
+  script:
+    - terraform init
+    - terraform workspace select stage
+    - terraform apply plan
+  dependencies:
+    - "generate plan for stage env"
+
+generate plan for prod env:
+  only:
+    - main
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: plan
+  script:
+    - terraform init
+    - terraform workspace select prod
+    - terraform plan  -var-file=common.tfvars -var-file=prod.env.tfvars -out plan
+  artifacts:
+    name: plan
+    paths:
+      - plan
+
+apply plan on prod env:
+  only:
+    - main
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: deploy
+  script:
+    - terraform init
+    - terraform workspace select prod
+    - terraform apply plan
+  dependencies:
+    - "generate plan for prod env"
