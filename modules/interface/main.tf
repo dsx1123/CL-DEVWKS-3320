@@ -7,22 +7,15 @@ terraform {
   }
 }
 
-provider "dcnm" {
-  username = var.ndfc.username
-  password = var.ndfc.password
-  url      = var.ndfc.url
-  platform = var.ndfc.platform
-}
-
 resource "dcnm_interface" "loopbacks" {
   for_each = {
-    for lo in var.loopbacks : "${lo.switch_name}|loopback${lo.loopback_id}" => lo
+    for lo in var.loopbacks : "${var.inventory[lo.switch_id]}|loopback${lo.loopback_id}" => lo
   }
   fabric_name   = var.fabric_name
   type          = "loopback"
   name          = "loopback${each.value.loopback_id}"
   policy        = "int_loopback"
-  switch_name_1 = each.value.switch_name
+  switch_name_1 = var.inventory[each.value.switch_id]
   vrf           = each.value.vrf
   ipv4          = each.value.loopback_ipv4
   loopback_tag  = each.value.route_tag
@@ -31,15 +24,14 @@ resource "dcnm_interface" "loopbacks" {
 
 resource "dcnm_interface" "vpcs" {
   for_each = {
-    for vpc in var.vpcs : "${vpc.switch_name_1}|${vpc.switch_name_2}|vpc${vpc.vpc_id}" => vpc
+    for vpc in var.vpcs : "${var.inventory[vpc.switch1_id]}|${var.inventory[vpc.switch2_id]}|vpc${vpc.vpc_id}" => vpc
   }
-  fabric_name   = var.fabric_name
-  policy        = "int_vpc_trunk_host"
-  type          = "vpc"
-  name          = "vPC${each.value.vpc_id}"
-  switch_name_1 = each.value.switch_name_1
-
-  switch_name_2           = each.value.switch_name_2
+  fabric_name             = var.fabric_name
+  policy                  = "int_vpc_trunk_host"
+  type                    = "vpc"
+  name                    = "vPC${each.value.vpc_id}"
+  switch_name_1           = var.inventory[each.value.switch1_id]
+  switch_name_2           = var.inventory[each.value.switch2_id]
   vpc_peer1_id            = each.value.vpc_id
   vpc_peer2_id            = each.value.vpc_id
   mode                    = each.value.mode

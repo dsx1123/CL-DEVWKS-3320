@@ -12,7 +12,7 @@ variable "fabric_name" {
 }
 
 variable "inventory" {
-  type = list(string)
+  type = map(any)
 }
 
 variable "templates" {
@@ -25,7 +25,7 @@ variable "templates" {
 
 variable "policies" {
   type = list(object({
-    switch_name   = string
+    switch_id     = string
     template_name = string
     description   = string
     priority      = number

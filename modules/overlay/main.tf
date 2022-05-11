@@ -7,15 +7,8 @@ terraform {
   }
 }
 
-provider "dcnm" {
-  username = var.ndfc.username
-  password = var.ndfc.password
-  url      = var.ndfc.url
-  platform = var.ndfc.platform
-}
-
 data "dcnm_inventory" "inventory" {
-  for_each    = toset(var.inventory)
+  for_each    = var.inventory
   fabric_name = var.fabric_name
   switch_name = each.value
 }
@@ -33,7 +26,7 @@ resource "dcnm_vrf" "vrfs" {
   dynamic "attachments" {
     for_each = each.value.attachments
     content {
-      serial_number = data.dcnm_inventory.inventory[attachments.value.switch_name].serial_number
+      serial_number = data.dcnm_inventory.inventory[attachments.value.switch_id].serial_number
       attach        = true
     }
   }
@@ -55,7 +48,7 @@ resource "dcnm_network" "networks" {
   dynamic "attachments" {
     for_each = each.value.attachments
     content {
-      serial_number = data.dcnm_inventory.inventory[attachments.value.switch_name].serial_number
+      serial_number = data.dcnm_inventory.inventory[attachments.value.switch_id].serial_number
       switch_ports  = attachments.value.switch_ports
       attach        = true
     }

@@ -1,18 +1,9 @@
-variable "ndfc" {
-  type = object({
-    username = string
-    password = string
-    url      = string
-    platform = string
-  })
-}
-
 variable "fabric_name" {
   type = string
 }
 
 variable "inventory" {
-  type = list(string)
+  type = map(any)
 }
 
 variable "vrfs" {
@@ -22,7 +13,7 @@ variable "vrfs" {
     segment_id  = number
     description = string
     attachments = list(object({
-      switch_name = string
+      switch_id = string
     }))
   }))
 }
@@ -36,7 +27,7 @@ variable "networks" {
     ipv4_gateway = string
     description  = string
     attachments = list(object({
-      switch_name  = string
+      switch_id    = string
       switch_ports = list(string)
     }))
   }))

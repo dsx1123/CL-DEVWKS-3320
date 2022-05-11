@@ -15,7 +15,7 @@ provider "dcnm" {
 }
 
 data "dcnm_inventory" "inventory" {
-  for_each    = toset(var.inventory)
+  for_each    = var.inventory
   fabric_name = var.fabric_name
   switch_name = each.value
 }
@@ -38,7 +38,7 @@ resource "dcnm_policy" "policy" {
     for index, p in var.policies : index => p
   }
   depends_on            = [dcnm_template.templates]
-  serial_number         = data.dcnm_inventory.inventory[each.value.switch_name].serial_number
+  serial_number         = data.dcnm_inventory.inventory[each.value.switch_id].serial_number
   template_name         = each.value.template_name
   template_props        = each.value.props
   priority              = each.value.priority
