@@ -2,6 +2,7 @@ stages:
   - validate
   - plan
   - deploy
+  - verify
 
 tf_validate:
   image:
@@ -52,6 +53,20 @@ apply plan on stage env:
   dependencies:
     - "generate plan for stage env"
 
+verify on stage env:
+  except:
+    - main
+  only:
+    - merge_requests
+  image:
+    name: "shdu/pyats-geinie:latest"
+    entrypoint: [""]
+  stage: verify
+  script:
+    - cd tests
+    - pyats run job test_job.py -t stage.yml
+
+
 generate plan for prod env:
   only:
     - main
@@ -81,3 +96,14 @@ apply plan on prod env:
     - terraform apply plan
   dependencies:
     - "generate plan for prod env"
+
+verify on stage env:
+  only:
+    - main
+  image:
+    name: "shdu/pyats-geinie:latest"
+    entrypoint: [""]
+  stage: verify
+  script:
+    - cd tests
+    - pyats run job test_job.py -t prod.yml
