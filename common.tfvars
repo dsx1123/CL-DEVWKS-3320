@@ -13,7 +13,7 @@ loopbacks = [
     vrf           = "vrf_app1"
     route_tag     = 12345
     route_tag     = 12345
-  },
+  }
 ]
 
 vpcs = [
@@ -51,7 +51,7 @@ vrfs = [
       },
       {
         switch_id = 102
-      },
+      }
     ]
   }
 ]

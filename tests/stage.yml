@@ -1,0 +1,21 @@
+testbed:
+  name: stage
+  credentials:
+    default:
+      username: admin
+      password: "cisco.123"
+devices:
+  leaf1:
+    os: nxos
+    type: nxos
+    connections:
+      cli:
+        protocol: ssh
+        ip: 10.15.6.12
+  leaf2:
+    os: nxos
+    type: nxos
+    connections:
+      cli:
+        protocol: ssh
+        ip: 10.15.6.13
