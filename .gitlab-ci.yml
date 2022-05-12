@@ -59,11 +59,12 @@ verify on stage env:
   only:
     - merge_requests
   image:
-    name: "shdu/pyats-geinie:latest"
+    name: "shdu/pyats-genie:latest"
     entrypoint: [""]
   stage: verify
   script:
     - cd tests
+    - source /pyats/bin/activate
     - pyats run job test_job.py -t stage.yml
 
 
@@ -97,13 +98,14 @@ apply plan on prod env:
   dependencies:
     - "generate plan for prod env"
 
-verify on stage env:
+verify on prod env:
   only:
     - main
   image:
-    name: "shdu/pyats-geinie:latest"
+    name: "shdu/pyats-genie:latest"
     entrypoint: [""]
   stage: verify
   script:
     - cd tests
+    - source /pyats/bin/activate
     - pyats run job test_job.py -t prod.yml
