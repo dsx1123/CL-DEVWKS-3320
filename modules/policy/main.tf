@@ -7,13 +7,6 @@ terraform {
   }
 }
 
-provider "dcnm" {
-  username = var.ndfc.username
-  password = var.ndfc.password
-  url      = var.ndfc.url
-  platform = var.ndfc.platform
-}
-
 data "dcnm_inventory" "inventory" {
   for_each    = var.inventory
   fabric_name = var.fabric_name
@@ -46,5 +39,4 @@ resource "dcnm_policy" "policy" {
   entity_name           = "SWITCH"
   entity_type           = "SWITCH"
   template_content_type = "TEMPLATE_CLI"
-
 }

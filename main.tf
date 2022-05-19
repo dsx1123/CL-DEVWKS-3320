@@ -14,8 +14,8 @@ terraform {
 }
 
 provider "dcnm" {
-  username = var.ndfc.username
-  password = var.ndfc.password
+  username = var.nd_username
+  password = var.nd_password
   url      = var.ndfc.url
   platform = var.ndfc.platform
 }

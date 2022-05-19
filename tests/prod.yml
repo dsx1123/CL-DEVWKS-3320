@@ -1,9 +1,9 @@
 testbed:
-  name: stage
+  name: prod
   credentials:
     default:
       username: admin
-      password: "cisco.123"
+      password: "%ENV{SWITCH_PASS}"
 devices:
   leaf1:
     os: nxos

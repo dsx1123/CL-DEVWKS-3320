@@ -1,10 +1,18 @@
 variable "ndfc" {
   type = object({
-    username = string
-    password = string
     url      = string
     platform = string
   })
+}
+
+variable "nd_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "nd_password" {
+  type      = string
+  sensitive = true
 }
 
 variable "fabric_name" {

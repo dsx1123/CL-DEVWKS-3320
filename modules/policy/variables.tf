@@ -1,12 +1,3 @@
-variable "ndfc" {
-  type = object({
-    username = string
-    password = string
-    url      = string
-    platform = string
-  })
-}
-
 variable "fabric_name" {
   type = string
 }
