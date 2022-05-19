@@ -24,7 +24,6 @@ class CommonSetup(aetest.CommonSetup):
         self.parent.parameters.update(dev=device_list)
         self.parent.parameters.update(desire_vni=[
             50001,
-            50002,
             30001,
             30002])
 
