@@ -41,7 +41,7 @@ resource "dcnm_network" "networks" {
   network_id   = each.value.network_id
   vlan_id      = each.value.vlan_id
   description  = each.value.description
-  vrf_name     = each.value.vrf_name
+  vrf_name     = dcnm_vrf.vrfs[each.value.vrf_name].name
   ipv4_gateway = each.value.ipv4_gateway
   deploy       = true
 
