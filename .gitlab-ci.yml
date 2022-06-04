@@ -7,7 +7,7 @@ stages:
 
 tf_validate:
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: validate
   except:
@@ -26,7 +26,7 @@ initialize workspace stage:
   only:
     - merge_requests
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: init
   script:
@@ -39,7 +39,7 @@ generate plan for stage env:
   only:
     - merge_requests
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: plan
   script:
@@ -57,7 +57,7 @@ apply plan on stage env:
   only:
     - merge_requests
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: deploy
   script:
@@ -85,7 +85,7 @@ initialize workspace prod:
   only:
     - main
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: init
   script:
@@ -96,7 +96,7 @@ generate plan for prod env:
   only:
     - main
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: plan
   script:
@@ -112,7 +112,7 @@ apply plan on prod env:
   only:
     - main
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
   stage: deploy
   script:
