@@ -24,8 +24,7 @@ class CommonSetup(aetest.CommonSetup):
         self.parent.parameters.update(dev=device_list)
         self.parent.parameters.update(desire_vni=[
             50001,
-            30001,
-            30002])
+            30001])
 
 
 class VniTest(aetest.Testcase):
@@ -55,7 +54,7 @@ class VniTest(aetest.Testcase):
     def desired_vni(self):
         result = []
         for device in self.parent.parameters["dev"]:
-            log.info(f"Check if all VNI are UP for device {device.name}")
+            log.info(f"Check if all desired VNI are deployed on device {device.name}")
             for vni in self.parent.parameters["desire_vni"]:
                 if vni not in self.all_vni_status[device.name].keys():
                     result.append(vni)
