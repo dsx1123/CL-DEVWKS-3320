@@ -80,30 +80,6 @@ networks = [
         ]
       }
     ]
-  },
-  {
-    name         = "network_app"
-    network_id   = 30002
-    vlan_id      = 2312
-    description  = "network for app tier"
-    vrf_name     = "vrf_app1"
-    ipv4_gateway = "10.1.2.1/24"
-    attachments = [
-      {
-        switch_id = 101
-        switch_ports = [
-          "Port-channel30",
-          "Port-channel40",
-        ]
-      },
-      {
-        switch_id = 102
-        switch_ports = [
-          "Port-channel30",
-          "Port-channel40",
-        ]
-      }
-    ]
   }
 ]
 

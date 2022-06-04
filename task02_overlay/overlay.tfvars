@@ -54,29 +54,5 @@ networks = [
         ]
       }
     ]
-  },
-  {
-    name         = "network_devnet2"
-    network_id   = 130002
-    vlan_id      = 2302
-    description  = "Network2 for DEVWKS-3320"
-    vrf_name     = "vrf_devnet"
-    ipv4_gateway = "10.10.11.1/24"
-    attachments = [
-      {
-        switch_id = 101
-        switch_ports = [
-          "Port-channel10",
-          "Port-channel20",
-        ]
-      },
-      {
-        switch_id = 102
-        switch_ports = [
-          "Port-channel10",
-          "Port-channel20",
-        ]
-      }
-    ]
   }
 ]

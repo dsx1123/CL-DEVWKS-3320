@@ -41,7 +41,7 @@ module "overlay" {
 # bonus
 
 module "policy" {
-  source      = "../modules/policy"
+  source      = "./modules/policy"
   fabric_name = var.fabric_name
   inventory   = var.inventory
   templates   = var.templates
