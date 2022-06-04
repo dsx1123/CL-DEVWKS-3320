@@ -1,5 +1,6 @@
 stages:
   - validate
+  - init
   - plan
   - deploy
   - verify
@@ -19,6 +20,19 @@ tf_validate:
     - terraform validate
     - terraform fmt -check=true
 
+initialize workspace stage:
+  except:
+    - main
+  only:
+    - merge_requests
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: init
+  script:
+    - terraform init
+    - terraform workspace new stage || true
+
 generate plan for stage env:
   except:
     - main
@@ -30,7 +44,6 @@ generate plan for stage env:
   stage: plan
   script:
     - terraform init
-    - terraform workspace new stage
     - terraform workspace select stage
     - terraform plan  -var-file=common.tfvars -var-file=stage.env.tfvars -out plan
   artifacts:
@@ -68,6 +81,16 @@ verify on stage env:
     - source /pyats/bin/activate
     - pyats run job test_job.py -t stage.yml
 
+initialize workspace prod:
+  only:
+    - main
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  stage: init
+  script:
+    - terraform init
+    - terraform workspace new prod || true
 
 generate plan for prod env:
   only:
@@ -111,4 +134,3 @@ verify on prod env:
     - cd tests
     - source /pyats/bin/activate
     - pyats run job test_job.py -t prod.yml
-
