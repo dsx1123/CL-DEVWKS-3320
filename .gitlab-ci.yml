@@ -101,7 +101,6 @@ generate plan for prod env:
   stage: plan
   script:
     - terraform init
-    - terraform workspace new prod
     - terraform workspace select prod
     - terraform plan  -var-file=common.tfvars -var-file=prod.env.tfvars -out plan
   artifacts:
