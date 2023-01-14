@@ -29,6 +29,8 @@ set_deploy_env:prod:
 
 tf_validate:
   stage: validate
+  rules:
+    - when: always
   needs: []
   image:
     name: "hashicorp/terraform:1.2.2"
