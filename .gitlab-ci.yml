@@ -1,136 +1,127 @@
+---
 stages:
+  - review
   - validate
   - init
   - plan
   - deploy
   - verify
 
-tf_validate:
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
-  stage: validate
-  except:
-    - main
-  only:
-    - merge_requests
-    - branches
+set_deploy_env:stage:
+  stage: review
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - terraform init
+    - echo "ENV=stage" >> review.env
+  artifacts:
+    reports:
+      dotenv: review.env
+
+set_deploy_env:prod:
+  stage: review
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - echo "ENV=prod" >> review.env
+  artifacts:
+    reports:
+      dotenv: review.env
+
+tf_validate:
+  stage: validate
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs: 
+    - job: set_deploy_env:stage
+      optional: true
+    - job: set_deploy_env:prod
+      optional: true
+  image:
+    name: "hashicorp/terraform:1.2.2"
+    entrypoint: [""]
+  script:
+    - terraform init -backend-config=config.s3.backend.tfvars
     - terraform validate
     - terraform fmt -check=true
 
-initialize workspace stage:
-  except:
-    - main
-  only:
-    - merge_requests
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
+init_workspace:
   stage: init
-  script:
-    - terraform init
-    - terraform workspace new stage || true
-
-generate plan for stage env:
-  except:
-    - main
-  only:
-    - merge_requests
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      allow_failure: true
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      allow_failure: true
+  needs: 
+    - job: set_deploy_env:stage
+      optional: true
+    - job: set_deploy_env:prod
+      optional: true
   image:
-    name: "hashicorp/terraform"
+    name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
-  stage: plan
   script:
-    - terraform init
-    - terraform workspace select stage
-    - terraform plan  -var-file=common.tfvars -var-file=stage.env.tfvars -out plan
+    - terraform init -backend-config=config.s3.backend.tfvars
+    - terraform workspace new $ENV
+
+tf_plan:
+  stage: plan
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs: 
+    - job: set_deploy_env:stage
+      optional: true
+    - job: set_deploy_env:prod
+      optional: true
+    - job: tf_validate
+    - job: init_workspace
+  image:
+    name: "hashicorp/terraform:1.2.2"
+    entrypoint: [""]
+  script:
+    - terraform init -backend-config=config.s3.backend.tfvars
+    - terraform workspace select $ENV
+    - terraform plan  -var-file=common.tfvars -var-file=$ENV.env.tfvars -out plan
   artifacts:
     name: plan
     paths:
       - plan
 
-apply plan on stage env:
-  except:
-    - main
-  only:
-    - merge_requests
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
+tf_apply:
   stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs:
+    - job: set_deploy_env:stage
+      optional: true
+    - job: set_deploy_env:prod
+      optional: true
+    - job: tf_plan
+  image:
+    name: "hashicorp/terraform:1.2.2"
+    entrypoint: [""]
   script:
-    - terraform init
-    - terraform workspace select stage
+    - terraform init -backend-config=config.s3.backend.tfvars
+    - terraform workspace select $ENV
     - terraform apply plan
-  dependencies:
-    - "generate plan for stage env"
 
-verify on stage env:
-  except:
-    - main
-  only:
-    - merge_requests
+verify:
+  stage: verify
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs:
+    - job: set_deploy_env:stage
+      optional: true
+    - job: set_deploy_env:prod
+      optional: true
+    - job: tf_apply
   image:
     name: "shdu/pyats-genie:latest"
     entrypoint: [""]
-  stage: verify
   script:
     - cd tests
     - source /pyats/bin/activate
-    - pyats run job test_job.py -t stage.yml
-
-initialize workspace prod:
-  only:
-    - main
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
-  stage: init
-  script:
-    - terraform init
-    - terraform workspace new prod || true
-
-generate plan for prod env:
-  only:
-    - main
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
-  stage: plan
-  script:
-    - terraform init
-    - terraform workspace select prod
-    - terraform plan  -var-file=common.tfvars -var-file=prod.env.tfvars -out plan
-  artifacts:
-    name: plan
-    paths:
-      - plan
-
-apply plan on prod env:
-  only:
-    - main
-  image:
-    name: "hashicorp/terraform"
-    entrypoint: [""]
-  stage: deploy
-  script:
-    - terraform init
-    - terraform workspace select prod
-    - terraform apply plan
-  dependencies:
-    - "generate plan for prod env"
-
-verify on prod env:
-  only:
-    - main
-  image:
-    name: "shdu/pyats-genie:latest"
-    entrypoint: [""]
-  stage: verify
-  script:
-    - cd tests
-    - source /pyats/bin/activate
-    - pyats run job test_job.py -t prod.yml
-
+    - pyats run job test_job.py -t $ENV.yml
