@@ -29,14 +29,7 @@ set_deploy_env:prod:
 
 tf_validate:
   stage: validate
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  needs: 
-    - job: set_deploy_env:stage
-      optional: true
-    - job: set_deploy_env:prod
-      optional: true
+  needs: []
   image:
     name: "hashicorp/terraform:1.2.2"
     entrypoint: [""]
@@ -52,7 +45,7 @@ init_workspace:
       allow_failure: true
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       allow_failure: true
-  needs: 
+  needs:
     - job: set_deploy_env:stage
       optional: true
     - job: set_deploy_env:prod
@@ -69,7 +62,7 @@ tf_plan:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  needs: 
+  needs:
     - job: set_deploy_env:stage
       optional: true
     - job: set_deploy_env:prod
