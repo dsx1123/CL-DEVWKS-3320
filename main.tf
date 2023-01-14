@@ -2,7 +2,7 @@ terraform {
   required_providers {
     dcnm = {
       source  = "CiscoDevNet/dcnm"
-      version = "1.2.2"
+      version = "1.2.7"
     }
   }
   backend "s3" {
