@@ -33,7 +33,7 @@ tf_validate:
     - when: always
   needs: []
   image:
-    name: "hashicorp/terraform:1.2.2"
+    name: "hashicorp/terraform:1.2.7"
     entrypoint: [""]
   script:
     - terraform init -backend-config=config.s3.backend.tfvars
@@ -53,7 +53,7 @@ init_workspace:
     - job: set_deploy_env:prod
       optional: true
   image:
-    name: "hashicorp/terraform:1.2.2"
+    name: "hashicorp/terraform:1.2.7"
     entrypoint: [""]
   script:
     - terraform init -backend-config=config.s3.backend.tfvars
@@ -72,7 +72,7 @@ tf_plan:
     - job: tf_validate
     - job: init_workspace
   image:
-    name: "hashicorp/terraform:1.2.2"
+    name: "hashicorp/terraform:1.2.7"
     entrypoint: [""]
   script:
     - terraform init -backend-config=config.s3.backend.tfvars
@@ -95,7 +95,7 @@ tf_apply:
       optional: true
     - job: tf_plan
   image:
-    name: "hashicorp/terraform:1.2.2"
+    name: "hashicorp/terraform:1.2.7"
     entrypoint: [""]
   script:
     - terraform init -backend-config=config.s3.backend.tfvars
