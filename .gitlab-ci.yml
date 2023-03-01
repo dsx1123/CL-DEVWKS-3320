@@ -1,8 +1,11 @@
 ---
+variables:
+  TF_HTTP_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${ENV}
+  TF_HTTP_LOCK_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${ENV}/lock
+  TF_HTTP_UNLOCK_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${ENV}/lock
 stages:
   - review
   - validate
-  - init
   - plan
   - deploy
   - verify
@@ -33,31 +36,12 @@ tf_validate:
     - when: always
   needs: []
   image:
-    name: "hashicorp/terraform:1.2.7"
+    name: "hashicorp/terraform:1.3.7"
     entrypoint: [""]
   script:
-    - terraform init -backend-config=config.s3.backend.tfvars
+    - terraform init
     - terraform validate
     - terraform fmt -check=true
-
-init_workspace:
-  stage: init
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      allow_failure: true
-  needs:
-    - job: set_deploy_env:stage
-      optional: true
-    - job: set_deploy_env:prod
-      optional: true
-  image:
-    name: "hashicorp/terraform:1.2.7"
-    entrypoint: [""]
-  script:
-    - terraform init -backend-config=config.s3.backend.tfvars
-    - terraform workspace new $ENV
 
 tf_plan:
   stage: plan
@@ -70,13 +54,12 @@ tf_plan:
     - job: set_deploy_env:prod
       optional: true
     - job: tf_validate
-    - job: init_workspace
   image:
-    name: "hashicorp/terraform:1.2.7"
+    name: "hashicorp/terraform:1.3.7"
     entrypoint: [""]
   script:
-    - terraform init -backend-config=config.s3.backend.tfvars
-    - terraform workspace select $ENV
+    - echo $TF_HTTP_ADDRESS
+    - terraform init
     - terraform plan  -var-file=common.tfvars -var-file=$ENV.env.tfvars -out plan
   artifacts:
     name: plan
@@ -95,11 +78,10 @@ tf_apply:
       optional: true
     - job: tf_plan
   image:
-    name: "hashicorp/terraform:1.2.7"
+    name: "hashicorp/terraform:1.3.7"
     entrypoint: [""]
   script:
-    - terraform init -backend-config=config.s3.backend.tfvars
-    - terraform workspace select $ENV
+    - terraform init
     - terraform apply plan
 
 verify:
