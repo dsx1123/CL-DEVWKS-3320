@@ -5,8 +5,7 @@ terraform {
       version = "1.2.7"
     }
   }
-  backend "s3" {
-
+  backend "http" {
   }
 }
 
@@ -16,7 +15,6 @@ provider "dcnm" {
   url      = var.ndfc.url
   platform = var.ndfc.platform
 }
-
 
 module "interfaces" {
   source      = "./modules/interface"
@@ -44,4 +42,3 @@ module "policy" {
   templates   = var.templates
   policies    = var.policies
 }
-
