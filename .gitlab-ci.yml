@@ -61,7 +61,6 @@ tf_plan:
     name: "hashicorp/terraform:1.3.7"
     entrypoint: [""]
   script:
-    - echo $TF_HTTP_ADDRESS
     - terraform init
     - terraform plan  -var-file=common.tfvars -var-file=$ENV.env.tfvars -out plan
   artifacts:
